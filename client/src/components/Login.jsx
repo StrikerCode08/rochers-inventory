@@ -1,17 +1,19 @@
 import React, { useState } from "react";
+import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api";
 
-const Login = ({ setUser }) => {
+const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { setUser } = useUser();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const user = await loginUser(username, password);
+      const { user } = await loginUser(username, password);
       setUser(user);
-      navigate("/dashboard");
+      navigate(user.role === "admin" ? "/admin/home" : "/home");
     } catch (error) {
       alert("Error: " + error.response.data);
     }

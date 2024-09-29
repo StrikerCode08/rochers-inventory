@@ -63,6 +63,7 @@ router.post("/login", async (req, res) => {
     secure: process.env.NODE_ENV === "production" ? true : false, // Use false for local development, true for production with HTTPS
     sameSite: "lax",
   });
+  user.password = undefined;
   res.json({ message: "Logged in successfully", user });
 });
 
