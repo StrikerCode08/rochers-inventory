@@ -13,7 +13,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173", // Example origin
-  "https://rochersadmin.strikercode.tech", // Add your production origin
+  "https://rochersadmin.strikercode.tech/", // Add your production origin
   "https://rochers-inventory.pages.dev/",
 ];
 
