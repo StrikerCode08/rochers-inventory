@@ -10,9 +10,9 @@ import { UserProvider, useUser } from "./context/UserContext";
 import Login from "./components/Login";
 import UserHome from "./components/UserHome";
 import AdminHome from "./components/AdminHome";
-import AdminLayout from "./components/AdminLayout";
+import Layout from "./components/Layout";
 
-const ProtectedRoute = ({ allowedRoles, redirectPath = "/" }) => {
+const ProtectedRoute = ({ allowedRoles, redirectPath = "/login" }) => {
   const { user } = useUser();
 
   if (!user || !allowedRoles.includes(user.role)) {
@@ -33,34 +33,28 @@ const AppRoutes = () => {
           user ? (
             <Navigate to={user.role === "admin" ? "/admin/home" : "/home"} />
           ) : (
-            <Login />
+            <Navigate to="/login" />
           )
         }
       />
-      <Route
-        path="/login"
-        element={
-          user ? (
-            <Navigate to={user.role === "admin" ? "/admin/home" : "/home"} />
-          ) : (
-            <Login />
-          )
-        }
-      />
-
-      <Route element={<ProtectedRoute allowedRoles={["user", "admin"]} />}>
-        <Route path="/home" element={<UserHome />} />
-      </Route>
-
-      <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/home" replace />} />
-          <Route path="home" element={<AdminHome />} />
-          {/* Add other admin routes here */}
+      <Route path="/login" element={<Login />} />
+      <Route element={<Layout />}>
+        <Route element={<ProtectedRoute allowedRoles={["user", "admin"]} />}>
+          <Route path="/home" element={<UserHome />} />
         </Route>
-      </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+          <Route path="/admin">
+            <Route index element={<Navigate to="/admin/home" replace />} />
+            <Route path="home" element={<AdminHome />} />
+            <Route path="users" element={<UserHome />} />
+            <Route path="products" element={<UserHome />} />
+            <Route path="categories" element={<UserHome />} />
+          </Route>
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
     </Routes>
   );
 };
@@ -69,10 +63,7 @@ const App = () => {
   return (
     <UserProvider>
       <Router>
-        <div className="flex justify-center items-center flex-col mt-4">
-          <h1>Rochers Pos</h1>
-          <AppRoutes />
-        </div>
+        <AppRoutes />
       </Router>
     </UserProvider>
   );

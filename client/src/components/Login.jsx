@@ -2,26 +2,36 @@ import React, { useState } from "react";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api";
-
+import RocherLogo from "../assets/Logo.svg";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { login } = useUser();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const { user } = await loginUser(username, password);
-      setUser(user);
+      login(user);
       navigate(user.role === "admin" ? "/admin/home" : "/home");
     } catch (error) {
-      alert("Error: " + error.response.data);
+      alert(
+        "Error: " +
+          JSON.stringify(error.response.data.errors.map((item) => item.msg))
+      );
     }
   };
 
   return (
-    <div className="flex justify-center items-center flex-col">
-      <h2>Login</h2>
+    <div className="flex justify-center items-center flex-col mt-10">
+      <div className="w-72 h-72 overflow-hidden relative">
+        <img
+          src={RocherLogo}
+          className="w-full h-auto object-cover"
+          alt="Vite logo"
+        />
+      </div>
+      <h2>Rochers Inventory Login</h2>
       <form
         onSubmit={handleSubmit}
         className="flex justify-center items-center flex-col gap-1"

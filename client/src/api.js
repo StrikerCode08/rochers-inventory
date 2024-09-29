@@ -29,7 +29,6 @@ api.interceptors.response.use(
     if (response) {
       // Handle error responses
       console.error("Error:", response.data);
-      alert(`Error: ${response.data}`);
     } else {
       console.error("Network error:", error.message);
       alert("Network error. Please try again later.");
