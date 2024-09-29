@@ -37,7 +37,7 @@ const Layout = () => {
           <div className="md:order-2 flex gap-1">
             <div className="flex space-x-3 md:space-x-0 rtl:space-x-reverse relative inline-flex items-center justify-center w-28 h-12 overflow-hidden bg-gray-100 rounded-lg dark:bg-gray-600">
               <span className="font-medium text-gray-600 dark:text-gray-300">
-                {user.username}
+                {user?.username}
               </span>
             </div>
 

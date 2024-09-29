@@ -39,7 +39,7 @@ const AppRoutes = () => {
       />
       <Route path="/login" element={<Login />} />
       <Route element={<Layout />}>
-        <Route element={<ProtectedRoute allowedRoles={["user", "admin"]} />}>
+        <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
           <Route path="/home" element={<UserHome />} />
         </Route>
 
