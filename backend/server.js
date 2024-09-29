@@ -13,21 +13,20 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173", // Example origin
-  "https://rochersadmin.strikercode.tech/", // Add your production origin
-  "https://rochers-inventory.pages.dev/",
+  "https://rochersadmin.strikercode.tech", // Add your production origin
+  "https://rochers-inventory.pages.dev",
 ];
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or Postman)
-      if (!origin || allowedOrigins.includes(origin)) {
+    origin: function (origin, callback) {
+      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, // Allow cookies to be sent
+    credentials: true,
   })
 );
 
