@@ -103,7 +103,7 @@ router.post(
       res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "None",
       });
 
       res.json({
