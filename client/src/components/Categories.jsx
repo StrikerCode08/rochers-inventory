@@ -1,7 +1,10 @@
 import React from "react";
 import DataTable from "./DataTable";
+import useCategories from "../hooks/useCategories";
 
 export default function Categories() {
+  const { categories } = useCategories();
+
   const tablehead = [
     {
       id: 1,
@@ -18,7 +21,7 @@ export default function Categories() {
   ];
   return (
     <div>
-      <DataTable tablehead={tablehead} />
+      <DataTable rows={categories.categories} tablehead={tablehead} />
     </div>
   );
 }
