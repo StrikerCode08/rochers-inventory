@@ -1,5 +1,4 @@
 import axios from "axios";
-
 // Create an Axios instance
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -23,12 +22,13 @@ api.interceptors.response.use(
     // Process the response data as needed
     return response.data; // You can return only the data part of the response
   },
-  (error) => {
+  async (error) => {
     // Handle errors globally
     const { response } = error;
     if (response) {
       // Handle error responses
-      console.error("Error:", response.data);
+      localStorage.removeItem("user");
+      alert(JSON.stringify(response.data));
     } else {
       console.error("Network error:", error.message);
       alert("Network error. Please try again later.");
@@ -51,8 +51,4 @@ export const loginUser = async (username, password) => {
 export const logoutUser = async () => {
   return await api.post("/users/logout");
 };
-
-// Function to fetch protected resource
-export const fetchProtectedResource = async () => {
-  return await api.get("/protected"); // Adjust the endpoint as necessary
-};
+export default api;

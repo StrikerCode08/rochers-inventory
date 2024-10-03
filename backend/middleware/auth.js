@@ -22,14 +22,15 @@ const adminAuth = async (req, res, next) => {
 
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
+
     req.user = await User.findById(verified._id);
-    if (!verified.role === "admin") {
-      res.status(401).send("Unathorized");
+    if (!req.user || verified.role !== "admin") {
+      return res.status(401).send("Unauthorized");
     }
+
     next();
   } catch (error) {
     res.status(400).send("Invalid Token");
   }
 };
-
 module.exports = { auth, adminAuth };

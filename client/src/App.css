@@ -1,42 +1,118 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
+.table-wrapper {
+  width: 100%;
+  padding: 1rem;
+}
+
+.table {
+  display: block;
+  overflow: hidden;
+  table-layout: fixed;
+  border-radius: 4px;
+  white-space: nowrap;
+  width: 100em;
+  max-width: 90%;
+  margin: auto;
+  table-layout: auto;
+  overflow-x: auto;
+}
+
+.table thead {
+  background-color: #ccc;
+  color: #222;
+  border: solid grey;
+}
+
+.table th,
+.table td {
+  padding: 0.8rem;
+  border-top: 0.5px solid #ddd;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: solid grey;
+}
+
+.expand {
+  width: 100%;
+}
+
+.label {
+  border-radius: 3px;
+  padding: 0.3rem;
+  color: white;
+}
+
+.label-draft {
+  background-color: #777;
+}
+
+.label-live {
+  background-color: #42a942;
+}
+
+.label-error {
+  background-color: #d9534f;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+.actions svg {
+  cursor: pointer;
+}
+
+.delete-btn {
+  color: #e10d05;
+}
+.modal-container {
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  border-radius: 5px;
   padding: 2rem;
-  text-align: center;
+  background-color: white;
+  width: 25em;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.modal .btn {
+  display: block;
+  margin: auto;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.form-group input,
+.form-group textarea,
+.form-group select {
+  border: 1px solid black;
+  border-radius: 0.3rem;
+  padding: 0.3rem;
+  font-size: 1rem;
 }
 
-.card {
-  padding: 2em;
+.form-group label {
+  margin-bottom: 0.2rem;
 }
 
-.read-the-docs {
-  color: #888;
+.error {
+  background-color: #f8d7da;
+  color: #df4759;
+  padding: 0.5rem;
+  border-radius: 0.3rem;
+  margin-bottom: 1rem;
 }

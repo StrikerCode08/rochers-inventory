@@ -2,9 +2,5 @@ import React from "react";
 import DataTable from "./DataTable";
 
 export default function AdminHome() {
-  return (
-    <div>
-      <DataTable />
-    </div>
-  );
+  return <div></div>;
 }

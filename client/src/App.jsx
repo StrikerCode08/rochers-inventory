@@ -11,11 +11,16 @@ import Login from "./components/Login";
 import UserHome from "./components/UserHome";
 import AdminHome from "./components/AdminHome";
 import Layout from "./components/Layout";
+import Products from "./components/Products";
+import Categories from "./components/Categories";
+import SubCat from "./components/SubCat";
+import Purchase from "./components/Purchase";
+import "./App.css";
 
-const ProtectedRoute = ({ allowedRoles, redirectPath = "/login" }) => {
+const ProtectedRoute = ({ redirectPath = "/login" }) => {
   const { user } = useUser();
 
-  if (!user || !allowedRoles.includes(user.role)) {
+  if (!user) {
     return <Navigate to={redirectPath} replace />;
   }
 
@@ -29,30 +34,17 @@ const AppRoutes = () => {
     <Routes>
       <Route
         path="/"
-        element={
-          user ? (
-            <Navigate to={user.role === "admin" ? "/admin/home" : "/home"} />
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
+        element={user ? <Navigate to="/home" /> : <Navigate to="/login" />}
       />
       <Route path="/login" element={<Login />} />
       <Route element={<Layout />}>
-        <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
-          <Route path="/home" element={<UserHome />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="home" element={<UserHome />} />
+          <Route path="products" element={<Products />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="subcategories" element={<SubCat />} />
+          <Route path="purchase" element={<Purchase />} />
         </Route>
-
-        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-          <Route path="/admin">
-            <Route index element={<Navigate to="/admin/home" replace />} />
-            <Route path="home" element={<AdminHome />} />
-            <Route path="users" element={<UserHome />} />
-            <Route path="products" element={<UserHome />} />
-            <Route path="categories" element={<UserHome />} />
-          </Route>
-        </Route>
-
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

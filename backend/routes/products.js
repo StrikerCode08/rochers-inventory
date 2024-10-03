@@ -21,39 +21,19 @@ const validate = (validations) => {
 // Add Product
 router.post(
   "/",
-  auth,
+  adminAuth,
   validate([
     body("name").trim().isLength({ min: 1 }).withMessage("Name is required"),
     body("category").isMongoId().withMessage("Invalid category ID"),
     body("subCategory").isMongoId().withMessage("Invalid subCategory ID"),
-    body("buyer").isMongoId().withMessage("Invalid buyer ID"),
-    body("broughtFor")
-      .isNumeric()
-      .withMessage("Brought for price must be a number"),
-    body("soldFor").isNumeric().withMessage("Sold for price must be a number"),
-    body("quantity")
-      .isInt({ min: 1 })
-      .withMessage("Quantity must be a positive integer"),
   ]),
   async (req, res) => {
     try {
-      const {
-        name,
-        category,
-        subCategory,
-        buyer,
-        broughtFor,
-        soldFor,
-        quantity,
-      } = req.body;
+      const { name, category, subCategory } = req.body;
       const product = new Product({
         name,
         category,
         subCategory,
-        buyer,
-        broughtFor,
-        soldFor,
-        quantity,
       });
 
       await product.save();
@@ -63,7 +43,42 @@ router.post(
     }
   }
 );
+//Edit Product
+router.put(
+  "/:id",
+  adminAuth,
+  validate([
+    body("name").trim().isLength({ min: 1 }).withMessage("Name is required"),
+    body("category").isMongoId().withMessage("Invalid category ID"),
+    body("subCategory").isMongoId().withMessage("Invalid subCategory ID"),
+  ]),
+  async (req, res) => {
+    const { id } = req.params;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
+    try {
+      const { name, category, subCategory } = req.body;
+
+      // Find the product by ID and update it
+      const product = await Product.findByIdAndUpdate(
+        id,
+        { name, category, subCategory },
+        { new: true, runValidators: true } // `new` returns the updated document, `runValidators` applies validators
+      );
+
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      res.status(200).json(product);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update product" });
+    }
+  }
+);
 // Delete Product
 router.delete(
   "/:id",
@@ -75,7 +90,7 @@ router.delete(
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
-      res.status(204).send();
+      res.status(204).json({ message: "Deleted" });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete product" });
     }
@@ -85,6 +100,7 @@ router.delete(
 // Get Products with Pagination
 router.get(
   "/",
+  auth,
   validate([
     query("page")
       .optional()
@@ -94,27 +110,47 @@ router.get(
       .optional()
       .isInt({ min: 1, max: 100 })
       .withMessage("Limit must be between 1 and 100"),
+    query("search")
+      .optional()
+      .isString()
+      .withMessage("Search must be a string"),
   ]),
   async (req, res) => {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 100); // Cap limit to 100
+    const skip = (page - 1) * limit;
+
+    // Prepare the search query
+    const searchKeyword = req.query.search
+      ? {
+          $or: [
+            { name: new RegExp(req.query.search, "i") },
+            { "category.name": new RegExp(req.query.search, "i") },
+            { "subCategory.name": new RegExp(req.query.search, "i") },
+          ],
+        }
+      : {};
     try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
-      const skip = (page - 1) * limit;
-
-      const products = await Product.find()
-        .populate("category subCategory buyer")
-        .skip(skip)
-        .limit(limit);
-
-      const total = await Product.countDocuments();
+      const [products, total] = await Promise.all([
+        Product.find(searchKeyword)
+          .populate("category subCategory")
+          .skip(skip)
+          .limit(limit),
+        Product.countDocuments(searchKeyword),
+      ]);
 
       res.json({
-        products,
+        products: products.map((product) => ({
+          ...product.toObject(),
+          category: product.category?.name || null,
+          subCategory: product.subCategory?.name || null,
+        })),
         currentPage: page,
         totalPages: Math.ceil(total / limit),
-        totalProducts: total,
+        totalItems: total,
       });
     } catch (error) {
+      console.error("Error fetching products:", error); // More specific error logging
       res.status(500).json({ error: "Failed to fetch products" });
     }
   }

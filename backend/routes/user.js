@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 const User = require("../models/user");
+const { adminAuth } = require("../middleware/auth");
 const router = express.Router();
 
 // Validation middleware
@@ -38,6 +39,7 @@ router.post(
       .isIn(["user", "admin"])
       .withMessage("Role must be either 'user' or 'admin'"),
   ]),
+  adminAuth,
   async (req, res) => {
     const { username, password, role } = req.body;
 

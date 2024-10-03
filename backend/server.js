@@ -3,6 +3,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/user");
 const productRoutes = require("./routes/products");
 const categoryRoutes = require("./routes/category"); // Ensure you have the right path
+const saleRoutes = require("./routes/sale"); // Ensure you have the right path
 const dotenv = require("dotenv");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -36,6 +37,7 @@ app.use(cookieParser());
 app.use("/api/users", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/sales", saleRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
