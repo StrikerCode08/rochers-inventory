@@ -27,7 +27,6 @@ api.interceptors.response.use(
     const { response } = error;
     if (response) {
       // Handle error responses
-      localStorage.removeItem("user");
       alert(JSON.stringify(response.data));
     } else {
       console.error("Network error:", error.message);
