@@ -150,44 +150,89 @@ router.get(
 );
 
 // Edit Sale
+// Edit Sale
 router.put(
   "/:id",
   auth,
   validate([
     param("id").isMongoId().withMessage("Invalid sale ID"),
-    body("product").isMongoId().withMessage("Valid product ID is required."),
-    body("buyer").isMongoId().withMessage("Valid buyer ID is required."),
-    body("quantity")
+    body("products")
+      .isArray({ min: 1 })
+      .withMessage("At least one product is required."),
+    body("products.*.id")
+      .isMongoId()
+      .withMessage("Valid product ID is required for each product."),
+    body("products.*.quantity")
       .isInt({ gt: 0 })
       .withMessage("Quantity must be a positive integer."),
-    body("broughtFor").isNumeric().withMessage("Brought For must be a number."),
-    body("soldFor").isNumeric().withMessage("Sold For must be a number."),
+    body("buyer").isMongoId().withMessage("Valid buyer ID is required."),
+    body("products.*.soldFor")
+      .isNumeric()
+      .withMessage("Sold For must be a number."),
+    body("products.*.broughtFor")
+      .isNumeric()
+      .withMessage("Brought For must be a number."),
   ]),
   async (req, res) => {
     try {
       const { id } = req.params;
-      const { product, buyer, quantity, broughtFor, soldFor } = req.body;
+      const { products, buyer } = req.body;
 
+      // Find the existing sale
       const sale = await Sale.findById(id);
       if (!sale) return res.status(404).json({ message: "Sale not found." });
 
-      const existingProduct = await Product.findById(product);
+      // Find the buyer
       const existingBuyer = await User.findById(buyer);
-
-      if (!existingProduct)
-        return res.status(404).json({ message: "Product not found." });
       if (!existingBuyer)
         return res.status(404).json({ message: "Buyer not found." });
 
-      const totalAmount = soldFor * quantity;
+      // Find the existing products from the request
+      const existingProducts = await Product.find({
+        _id: {
+          $in: products.map((item) => ObjectId.createFromHexString(item.id)),
+        },
+      });
 
-      sale.product = product;
+      let totalSellingAmount = 0;
+      let totalPurchaseAmount = 0;
+      const payLoad = [];
+
+      // Loop through products and calculate totals
+      products.forEach((item) => {
+        const existingProduct = existingProducts.find(
+          (prod) => prod._id.toString() === item.id
+        );
+
+        if (existingProduct) {
+          const productTotal = existingProduct.sellingPrice * item.quantity;
+          const productTotalPurchase =
+            existingProduct.costPrice * item.quantity;
+
+          payLoad.push({
+            product: existingProduct._id,
+            quantity: item.quantity,
+            productTotal,
+            soldFor: item.soldFor,
+            broughtFor: item.broughtFor,
+          });
+
+          totalSellingAmount += productTotal;
+          totalPurchaseAmount += productTotalPurchase;
+        } else {
+          console.log(
+            `Product with ID ${item.id} not found in existing products.`
+          );
+        }
+      });
+
+      // Update the sale with the new payload
+      sale.products = payLoad;
       sale.buyer = buyer;
-      sale.quantity = quantity;
-      sale.totalAmount = totalAmount;
-      sale.broughtFor = broughtFor;
-      sale.soldFor = soldFor;
+      sale.totalSellingAmount = totalSellingAmount;
+      sale.totalPurchaseAmount = totalPurchaseAmount;
 
+      // Save the updated sale
       await sale.save();
       res.json(sale);
     } catch (error) {
