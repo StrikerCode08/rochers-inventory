@@ -4,6 +4,7 @@ const Sale = require("../models/sale");
 const Product = require("../models/product");
 const User = require("../models/user");
 const { auth, adminAuth } = require("../middleware/auth");
+const { ObjectId } = require("mongodb");
 
 const router = express.Router();
 
@@ -36,25 +37,48 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const { product, buyer, quantity, broughtFor, soldFor } = req.body;
-
-      const existingProduct = await Product.findById(product);
+      const { products, buyer } = req.body;
+      const existingProducts = await Product.find({
+        _id: {
+          $in: [products.map((item) => ObjectId.createFromHexString(item.id))],
+        },
+      });
       const existingBuyer = await User.findById(buyer);
 
       if (!existingProduct)
         return res.status(404).json({ message: "Product not found." });
       if (!existingBuyer)
         return res.status(404).json({ message: "Buyer not found." });
+      let totalSellingAmount = 0;
+      let totalPurchaseAmount = 0;
+      const payLoad = [];
+      products.forEach((item) => {
+        const existingProduct = existingProducts.find(
+          (prod) => prod._id === item.id
+        );
 
-      const totalAmount = soldFor * quantity;
+        if (existingProduct) {
+          const productTotal = existingProduct.sellingPrice * item.quantity;
+          const productTotalPurchase =
+            existingProduct.costPrice * item.quantity;
+          payLoad.push({
+            ...item,
+            productTotal,
+          });
 
+          totalSellingAmount += productTotal;
+          totalPurchaseAmount += productTotalPurchase;
+        } else {
+          console.log(
+            `Product with ID ${item.id} not found in existing products.`
+          );
+        }
+      });
       const sale = new Sale({
-        product,
+        payLoad,
         buyer,
-        quantity,
-        totalAmount,
-        broughtFor,
-        soldFor,
+        totalSellingAmount,
+        totalPurchaseAmount,
       });
 
       await sale.save();
