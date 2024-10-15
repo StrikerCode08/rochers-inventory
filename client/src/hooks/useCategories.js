@@ -6,15 +6,13 @@ const useCategories = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(10); // For pagination limit
-
-  // Function to fetch categories with pagination
+  const [limit, setLimit] = useState(10);
   const fetchCategories = async (page = 1) => {
     setLoading(true);
     try {
       const response = await api.get(`/categories?page=${page}&limit=${limit}`);
-      setCategories(response.data.categories); // Adjust based on your API response structure
-      setCurrentPage(response.data.currentPage);
+      setCategories(response.categories);
+      setCurrentPage(response.currentPage);
     } catch (err) {
       setError(err);
       console.error("Error fetching categories:", err);
